@@ -14,6 +14,6 @@ public class UnitTest {
 		ParameterMap parameterMap = new ParameterMap();
 		parameterMap.put("Key", "Value");
 
-		httpClient.get("http://json.org/", parameterMap.toEncodedString());
+		httpClient.get("http://json.org/", parameterMap);
 	}
 }

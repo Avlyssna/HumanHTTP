@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Random;
+import humanhttp.ParameterMap;
 
 public class HttpClient {
 	private static final String[] USER_AGENTS = {
@@ -68,14 +69,14 @@ public class HttpClient {
 		System.out.println("Selected User-Agent: " + userAgent);
 	}
 
-	public String post(String url, String parameters) {
+	public String post(String url, ParameterMap parameters) {
 		HttpURLConnection connection = openConnection(url, "POST");
 
 		try {
 			// Enable, set, and send body
 			connection.setDoOutput(true);
 			DataOutputStream stream = new DataOutputStream(connection.getOutputStream());
-			stream.writeBytes(parameters);
+			stream.writeBytes(parameters.toEncodedString());
 			stream.flush();
 			stream.close();
 		} catch (IOException exception) {
@@ -90,8 +91,8 @@ public class HttpClient {
 		return readResponse(connection);
 	}
 
-	public String get(String url, String parameters) {
-		HttpURLConnection connection = openConnection(url + "?" + parameters, "GET");
+	public String get(String url, ParameterMap parameters) {
+		HttpURLConnection connection = openConnection(url + "?" + parameters.toEncodedString(), "GET");
 		return readResponse(connection);
 	}
 
