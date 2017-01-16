@@ -18,23 +18,28 @@ public class HttpClient {
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A" // Safari
 	};
 
-	private Random randomGenerator;
+	private Random randomGenerator = new Random();
 	private String userAgent;
+	private String baseUrl = "";
+
+	public void setBaseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
+	}
 
 	private HttpURLConnection openConnection(String url, String requestMethod) {
 		try {
-			HttpURLConnection connection = (HttpURLConnection)(new URL(url)).openConnection();
+			HttpURLConnection connection = (HttpURLConnection)(new URL(baseUrl + url)).openConnection();
 			connection.setRequestMethod(requestMethod);
 			connection.setRequestProperty("User-Agent", userAgent);
 			connection.setRequestProperty("Accept-Language", "en-US,en;q=0.8");
 
-			System.out.println("Connected to: " + url);
+			System.out.println("Connected to: " + baseUrl + url);
 			System.out.println("Using method: " + requestMethod);
 
 			return connection;
 		} catch (Exception exception) {
 			// Our URLs are sure to be valid; ignore this catch.
-			System.out.println("Exception when creating URL!");
+			System.out.println("Exception when creating URL:" + baseUrl + url);
 		}
 
 		return null;
@@ -91,6 +96,10 @@ public class HttpClient {
 		return readResponse(connection);
 	}
 
+	public String post() {
+		return post("");
+	}
+
 	public String get(String url, ParameterMap parameters) {
 		HttpURLConnection connection = openConnection(url + "?" + parameters.toEncodedString(), "GET");
 		return readResponse(connection);
@@ -101,8 +110,11 @@ public class HttpClient {
 		return readResponse(connection);
 	}
 
+	public String get() {
+		return get("");
+	}
+
 	public HttpClient() {
-		randomGenerator = new Random();
 		selectUserAgent();
 	}
 }
