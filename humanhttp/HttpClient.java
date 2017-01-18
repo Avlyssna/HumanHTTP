@@ -1,15 +1,24 @@
 package humanhttp;
 
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
+import java.util.Random;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 import java.io.InputStreamReader;
+import java.io.DataOutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Random;
+
 import humanhttp.ParameterMap;
 
 public class HttpClient {
+	private static final Logger LOGGER = Logger.getLogger(HttpClient.class.getName());
 	private static final String[] USER_AGENTS = {
 		"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36", // Chrome
 		"Mozilla/5.0 (Linux; U; Android 4.0.3; ko-kr; LG-L160L Build/IML74K) AppleWebkit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30", // Android
@@ -22,10 +31,7 @@ public class HttpClient {
 	private String userAgent;
 	private String baseUrl = "";
 
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
-	}
-
+	// Internal methods
 	private HttpURLConnection openConnection(String url, String requestMethod) {
 		try {
 			HttpURLConnection connection = (HttpURLConnection)(new URL(baseUrl + url)).openConnection();
@@ -33,13 +39,13 @@ public class HttpClient {
 			connection.setRequestProperty("User-Agent", userAgent);
 			connection.setRequestProperty("Accept-Language", "en-US,en;q=0.8");
 
-			System.out.println("Connected to: " + baseUrl + url);
-			System.out.println("Using method: " + requestMethod);
+			LOGGER.log(Level.INFO, String.format("Connected to: %s %s%s", requestMethod, baseUrl, url));
 
 			return connection;
-		} catch (Exception exception) {
-			// Our URLs are sure to be valid; ignore this catch.
-			System.out.println("Exception when creating URL:" + baseUrl + url);
+		} catch (MalformedURLException exception) {
+			LOGGER.log(Level.SEVERE, exception.getMessage());
+		} catch (IOException exception) {
+			LOGGER.log(Level.SEVERE, exception.getMessage());
 		}
 
 		return null;
@@ -57,61 +63,70 @@ public class HttpClient {
 
 			input.close();
 
-			System.out.println("Got response code: " + connection.getResponseCode());
-			System.out.println("Got response: " + response.toString());
+			LOGGER.log(Level.INFO, "Got response code: " + connection.getResponseCode());
+			LOGGER.log(Level.FINEST, "Got response: " + response.toString());
 
 			return response.toString();
 		} catch (IOException exception) {
-			System.out.println("Exception when reading response!");
+			LOGGER.log(Level.SEVERE, exception.getMessage());
 		}
 
 		return "";
 	}
 
+	// Public methods
 	public void selectUserAgent() {
 		userAgent = USER_AGENTS[randomGenerator.nextInt(USER_AGENTS.length)];
 
-		System.out.println("Selected User-Agent: " + userAgent);
+		LOGGER.log(Level.INFO, "Selected User-Agent: " + userAgent);
+	}
+
+	public void setBaseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
+	}
+
+	public void setBaseUrl() {
+		setBaseUrl("");
+	}
+
+	public String get(String url, ParameterMap parameters) {
+		return readResponse(
+			openConnection(String.format("%s?%s", url, parameters.toUrlEncodedString()), "GET")
+		);
+	}
+
+	public String get(String url) {
+		return readResponse(openConnection(url, "GET"));
+	}
+
+	public String get() {
+		return get("");
 	}
 
 	public String post(String url, ParameterMap parameters) {
 		HttpURLConnection connection = openConnection(url, "POST");
 
+		// Enable, set, and send body
+		connection.setDoOutput(true);
+
 		try {
-			// Enable, set, and send body
-			connection.setDoOutput(true);
 			DataOutputStream stream = new DataOutputStream(connection.getOutputStream());
-			stream.writeBytes(parameters.toEncodedString());
+			stream.writeBytes(parameters.toUrlEncodedString());
 			stream.flush();
 			stream.close();
 		} catch (IOException exception) {
-			System.out.println("Exception when sending POST data!");
+			LOGGER.log(Level.SEVERE, exception.getMessage());
 		}
 
 		return readResponse(connection);
 	}
 
 	public String post(String url) {
-		HttpURLConnection connection = openConnection(url, "POST");
-		return readResponse(connection);
+		return readResponse(openConnection(url, "POST"));
 	}
 
 	public String post() {
 		return post("");
-	}
-
-	public String get(String url, ParameterMap parameters) {
-		HttpURLConnection connection = openConnection(url + "?" + parameters.toEncodedString(), "GET");
-		return readResponse(connection);
-	}
-
-	public String get(String url) {
-		HttpURLConnection connection = openConnection(url, "GET");
-		return readResponse(connection);
-	}
-
-	public String get() {
-		return get("");
 	}
 
 	public HttpClient() {
