@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import java.io.UncheckedIOException;
 import java.io.InputStreamReader;
 import java.io.DataOutputStream;
 import java.io.BufferedReader;
@@ -43,12 +44,10 @@ public class HttpClient {
 
 			return connection;
 		} catch (MalformedURLException exception) {
-			LOGGER.log(Level.SEVERE, exception.getMessage());
+			throw new RuntimeException(exception);
 		} catch (IOException exception) {
-			LOGGER.log(Level.SEVERE, exception.getMessage());
+			throw new UncheckedIOException(exception);
 		}
-
-		return null;
 	}
 
 	private String readResponse(HttpURLConnection connection) {
@@ -68,10 +67,8 @@ public class HttpClient {
 
 			return response.toString();
 		} catch (IOException exception) {
-			LOGGER.log(Level.SEVERE, exception.getMessage());
+			throw new UncheckedIOException(exception);
 		}
-
-		return "";
 	}
 
 	// Public methods
@@ -115,7 +112,7 @@ public class HttpClient {
 			stream.flush();
 			stream.close();
 		} catch (IOException exception) {
-			LOGGER.log(Level.SEVERE, exception.getMessage());
+			throw new UncheckedIOException(exception);
 		}
 
 		return readResponse(connection);
