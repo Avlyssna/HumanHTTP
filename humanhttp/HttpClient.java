@@ -72,11 +72,11 @@ public class HttpClient {
 	}
 
 	// Public methods
-	public String getUserAgent() {
+	public synchronized String getUserAgent() {
 		return userAgent;
 	}
 
-	public void setUserAgent(String userAgent) {
+	public synchronized void setUserAgent(String userAgent) {
 		this.userAgent = userAgent;
 
 		LOGGER.log(Level.INFO, "Set User-Agent: " + getUserAgent());
@@ -86,11 +86,11 @@ public class HttpClient {
 		setUserAgent(USER_AGENTS[randomGenerator.nextInt(USER_AGENTS.length)]);
 	}
 
-	public String getBaseUrl() {
+	public synchronized String getBaseUrl() {
 		return baseUrl;
 	}
 
-	public void setBaseUrl(String baseUrl) {
+	public synchronized void setBaseUrl(String baseUrl) {
 		this.baseUrl = baseUrl;
 
 		LOGGER.log(Level.INFO, "Set base URL: " + getBaseUrl());
