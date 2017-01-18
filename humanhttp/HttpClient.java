@@ -72,14 +72,28 @@ public class HttpClient {
 	}
 
 	// Public methods
-	public void selectUserAgent() {
-		userAgent = USER_AGENTS[randomGenerator.nextInt(USER_AGENTS.length)];
+	public String getUserAgent() {
+		return userAgent;
+	}
 
-		LOGGER.log(Level.INFO, "Selected User-Agent: " + userAgent);
+	public void setUserAgent(String userAgent) {
+		this.userAgent = userAgent;
+
+		LOGGER.log(Level.INFO, "Set User-Agent: " + getUserAgent());
+	}
+
+	public void setRandomUserAgent() {
+		setUserAgent(USER_AGENTS[randomGenerator.nextInt(USER_AGENTS.length)]);
+	}
+
+	public String getBaseUrl() {
+		return baseUrl;
 	}
 
 	public void setBaseUrl(String baseUrl) {
 		this.baseUrl = baseUrl;
+
+		LOGGER.log(Level.INFO, "Set base URL: " + getBaseUrl());
 	}
 
 	public void setBaseUrl() {
@@ -127,6 +141,6 @@ public class HttpClient {
 	}
 
 	public HttpClient() {
-		selectUserAgent();
+		setRandomUserAgent();
 	}
 }
